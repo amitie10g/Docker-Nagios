@@ -1,30 +1,28 @@
 FROM ubuntu:25.10
-MAINTAINER Jason Rivers <jason@jasonrivers.co.uk>
+LABEL maintainer="Jason Rivers <jason@jasonrivers.co.uk>"
 
-ENV NAGIOS_HOME            /opt/nagios
-ENV NAGIOS_USER            nagios
-ENV NAGIOS_GROUP           nagios
-ENV NAGIOS_CMDUSER         nagios
-ENV NAGIOS_CMDGROUP        nagios
-ENV NAGIOS_FQDN            nagios.example.com
-ENV NAGIOSADMIN_USER       nagiosadmin
-ENV NAGIOSADMIN_PASS       nagios
-ENV APACHE_RUN_USER        nagios
-ENV APACHE_RUN_GROUP       nagios
-ENV NAGIOS_TIMEZONE        UTC
-ENV DEBIAN_FRONTEND        noninteractive
-
-ENV NG_NAGIOS_CONFIG_FILE  ${NAGIOS_HOME}/etc/nagios.cfg
-ENV NG_CGI_DIR             ${NAGIOS_HOME}/sbin
-ENV NG_WWW_DIR             ${NAGIOS_HOME}/share/nagiosgraph
-ENV NG_CGI_URL             /cgi-bin
-
-ENV NAGIOS_BRANCH          nagios-4.5.14
-ENV NAGIOS_PLUGINS_BRANCH  release-2.5
-ENV NRPE_BRANCH            nrpe-4.2.0
-ENV NCPA_BRANCH            v3.5.0
-ENV NSCA_BRANCH            nsca-2.10.3
-ENV NAGIOSTV_VERSION       0.9.8
+ENV NAGIOS_HOME=/opt/nagios
+ENV NAGIOS_USER=nagios
+ENV NAGIOS_GROUP=nagios
+ENV NAGIOS_CMDUSER=nagios
+ENV NAGIOS_CMDGROUP=nagios
+ENV NAGIOS_FQDN=nagios.example.com
+ENV NAGIOSADMIN_USER=nagiosadmin
+ENV NAGIOSADMIN_PASS=nagios
+ENV APACHE_RUN_USER=nagios
+ENV APACHE_RUN_GROUP=nagios
+ENV NAGIOS_TIMEZONE=UTC
+ENV DEBIAN_FRONTEND=noninteractive
+ENV NG_NAGIOS_CONFIG_FILE=${NAGIOS_HOME}/etc/nagios.cfg
+ENV NG_CGI_DIR=${NAGIOS_HOME}/sbin
+ENV NG_WWW_DIR=${NAGIOS_HOME}/share/nagiosgraph
+ENV NG_CGI_URL=/cgi-bin
+ENV NAGIOS_BRANCH=nagios-4.5.14
+ENV NAGIOS_PLUGINS_BRANCH=release-2.5
+ENV NRPE_BRANCH=nrpe-4.2.0
+ENV NCPA_BRANCH=v3.5.0
+ENV NSCA_BRANCH=nsca-2.10.3
+ENV NAGIOSTV_VERSION=0.9.8
 
 RUN echo postfix postfix/main_mailer_type string "'Internet Site'" | debconf-set-selections  && \
     echo postfix postfix/mynetworks string "127.0.0.0/8" | debconf-set-selections            && \
@@ -291,8 +289,8 @@ RUN ln -sf /etc/sv/* /etc/service
 # fix ping permissions for nagios user
 RUN chmod u+s /usr/bin/ping
 
-ENV APACHE_LOCK_DIR /var/run
-ENV APACHE_LOG_DIR /var/log/apache2
+ENV APACHE_LOCK_DIR=/var/run
+ENV APACHE_LOG_DIR=/var/log/apache2
 
 #Set ServerName and timezone for Apache
 RUN echo "ServerName ${NAGIOS_FQDN}" > /etc/apache2/conf-available/servername.conf    && \
