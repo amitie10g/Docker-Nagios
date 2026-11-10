@@ -1,0 +1,250 @@
+--- a/nagioscore/cgi/status.c
++++ b/nagioscore/cgi/status.c
+@@ -2503,8 +2503,7 @@
+
+ /* show an overview of servicegroup(s)... */
+ void show_servicegroup_overviews(void) {
+-	servicegroup *temp_servicegroup = NULL;
+-	int current_column;
++	servicegroup *temp_servicegroup = NULL;
+ 	int user_has_seen_something = FALSE;
+ 	int servicegroup_error = FALSE;
+
+@@ -2545,45 +2545,22 @@
+ 	if(show_all_servicegroups == TRUE) {
+
+
+-		printf("<div ALIGN=center>\n");
+-		printf("<table border=0 cellpadding=10>\n");
+-
+-		current_column = 1;
+-
+-		/* loop through all servicegroups... */
+-		for(temp_servicegroup = servicegroup_list; temp_servicegroup != NULL; temp_servicegroup = temp_servicegroup->next) {
+-
+-			/* make sure the user is authorized to view at least one host in this servicegroup */
+-			if(is_authorized_for_servicegroup(temp_servicegroup, &current_authdata) == FALSE)
+-				continue;
+-
+-			if(current_column == 1)
+-				printf("<tr>\n");
+-			printf("<td VALIGN=top ALIGN=center>\n");
+-
+-			show_servicegroup_overview(temp_servicegroup);
+-
+-			user_has_seen_something = TRUE;
+-
+-			printf("</td>\n");
+-			if(current_column == overview_columns)
+-				printf("</tr>\n");
+-
+-			if(current_column < overview_columns)
+-				current_column++;
+-			else
+-				current_column = 1;
+-			}
+-
+-		if(current_column != 1) {
+-
+-			for(; current_column <= overview_columns; current_column++)
+-				printf("<td></td>\n");
+-			printf("</tr>\n");
+-			}
+-
+-		printf("</table>\n");
+-		printf("</div>\n");
++		/* Masonry layout: independent service group cards */
++		printf("<div class='nagios-masonry'>\n");
++
++		for(temp_servicegroup = servicegroup_list; temp_servicegroup != NULL; temp_servicegroup = temp_servicegroup->next) {
++
++			if(is_authorized_for_servicegroup(temp_servicegroup, &current_authdata) == FALSE)
++				continue;
++
++			printf("<div class='nagios-masonry-card'>\n");
++			show_servicegroup_overview(temp_servicegroup);
++			printf("</div>\n");
++
++			user_has_seen_something = TRUE;
++		}
++
++		printf("</div>\n");
+ 		}
+
+ 	/* else display overview for just a specific servicegroup */
+@@ -3577,8 +3577,7 @@
+
+ /* show an overview of hostgroup(s)... */
+ void show_hostgroup_overviews(void) {
+-	hostgroup *temp_hostgroup = NULL;
+-	int current_column;
++	hostgroup *temp_hostgroup = NULL;
+ 	int user_has_seen_something = FALSE;
+ 	int hostgroup_error = FALSE;
+
+@@ -3619,45 +3619,22 @@
+ 	if(show_all_hostgroups == TRUE) {
+
+
+-		printf("<div ALIGN=center>\n");
+-		printf("<table border=0 cellpadding=10>\n");
+-
+-		current_column = 1;
+-
+-		/* loop through all hostgroups... */
+-		for(temp_hostgroup = hostgroup_list; temp_hostgroup != NULL; temp_hostgroup = temp_hostgroup->next) {
+-
+-			/* make sure the user is authorized to view this hostgroup */
+-			if(is_authorized_for_hostgroup(temp_hostgroup, &current_authdata) == FALSE)
+-				continue;
+-
+-			if(current_column == 1)
+-				printf("<tr>\n");
+-			printf("<td VALIGN=top ALIGN=center>\n");
+-
+-			show_hostgroup_overview(temp_hostgroup);
+-
+-			user_has_seen_something = TRUE;
+-
+-			printf("</td>\n");
+-			if(current_column == overview_columns)
+-				printf("</tr>\n");
+-
+-			if(current_column < overview_columns)
+-				current_column++;
+-			else
+-				current_column = 1;
+-			}
+-
+-		if(current_column != 1) {
+-
+-			for(; current_column <= overview_columns; current_column++)
+-				printf("<td></td>\n");
+-			printf("</tr>\n");
+-			}
+-
+-		printf("</table>\n");
+-		printf("</div>\n");
++		/* Masonry layout: independent host group cards */
++		printf("<div class='nagios-masonry'>\n");
++
++		for(temp_hostgroup = hostgroup_list; temp_hostgroup != NULL; temp_hostgroup = temp_hostgroup->next) {
++
++			if(is_authorized_for_hostgroup(temp_hostgroup, &current_authdata) == FALSE)
++				continue;
++
++			printf("<div class='nagios-masonry-card'>\n");
++			show_hostgroup_overview(temp_hostgroup);
++			printf("</div>\n");
++
++			user_has_seen_something = TRUE;
++		}
++
++		printf("</div>\n");
+ 		}
+
+ 	/* else display overview for just a specific hostgroup */
+@@ -3731,7 +3731,7 @@
+ 	printf("<table class='status'>\n");
+
+ 	printf("<tr>\n");
+-	printf("<th class='status'>Host</th><th class='status'>Status</th><th class='status'>Services</th><th class='status'>Actions</th>\n");
++	printf("<th class='status'>Host</th><th class='status'>IP Address</th><th class='status'>Status</th><th class='status'>Services</th><th class='status'>Actions</th>\n");
+ 	printf("</tr>\n");
+
+ 	/* find all the hosts that belong to the hostgroup */
+@@ -3832,10 +3832,13 @@
+ 		printf("</td>\n");
+ 		}
+ 	printf("</tr>\n");
+ 	printf("</table>\n");
+ 	printf("</td>\n");
+
++	if(data == NULL)
++		printf("<td class='status%s'>%s</td>\n", status_bg_class, temp_host->address);
++
+ 	printf("<td class='status%s'>%s</td>\n", status_class, status);
+
+ 	printf("<td class='status%s'>\n", status_bg_class);
+ 	show_servicegroup_hostgroup_member_service_status_totals(hststatus->host_name, data);
+--- a/nagioscore/html/stylesheets/common.css
++++ b/nagioscore/html/stylesheets/common.css
+@@ -336,4 +336,38 @@
+ a img {
+ 	border: none;
+ 	}
++
++.nagios-masonry {
++    width: 100%;
++    column-count: 4;
++    column-gap: 2%;
++    column-fill: balance;
++}
++
++.nagios-masonry-card {
++    display: inline-block;
++    width: 100%;
++    box-sizing: border-box;
++    margin: 0 0 18px 0;
++    vertical-align: top;
++    break-inside: avoid;
++    -webkit-column-break-inside: avoid;
++}
++
++.nagios-masonry-card table.status {
++    width: 100%;
++    box-sizing: border-box;
++}
++
++@media screen and (max-width: 1200px) {
++    .nagios-masonry { column-count: 3; }
++}
++
++@media screen and (max-width: 800px) {
++    .nagios-masonry { column-count: 2; }
++}
++
++@media screen and (max-width: 500px) {
++    .nagios-masonry { column-count: 1; }
++}
+
+--- a/nagioscore/contrib/exfoliation/stylesheets/common.css
++++ b/nagioscore/contrib/exfoliation/stylesheets/common.css
+@@ -797,4 +797,38 @@
+ .NavBarSearchItem {
+   font-size: 9pt;
+ }
++
++.nagios-masonry {
++    width: 100%;
++    column-count: 4;
++    column-gap: 2%;
++    column-fill: balance;
++}
++
++.nagios-masonry-card {
++    display: inline-block;
++    width: 100%;
++    box-sizing: border-box;
++    margin: 0 0 18px 0;
++    vertical-align: top;
++    break-inside: avoid;
++    -webkit-column-break-inside: avoid;
++}
++
++.nagios-masonry-card table.status {
++    width: 100%;
++    box-sizing: border-box;
++}
++
++@media screen and (max-width: 1200px) {
++    .nagios-masonry { column-count: 3; }
++}
++
++@media screen and (max-width: 800px) {
++    .nagios-masonry { column-count: 2; }
++}
++
++@media screen and (max-width: 500px) {
++    .nagios-masonry { column-count: 1; }
++}
